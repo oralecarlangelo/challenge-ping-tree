@@ -20,19 +20,19 @@ const STORED_DATA = [{
   }
 }]
 
-// const requestData = {
-//   url: 'http://google.com',
-//   value: '0.50',
-//   maxAcceptsPerDay: '10',
-//   accept: {
-//     geoState: {
-//       $in: ['ca', 'ph']
-//     },
-//     hour: {
-//       $in: ['13', '14', '15']
-//     }
-//   }
-// }
+const requestData = {
+  url: 'http://google.com',
+  value: '0.50',
+  maxAcceptsPerDay: '10',
+  accept: {
+    geoState: {
+      $in: ['ca', 'ph']
+    },
+    hour: {
+      $in: ['13', '14', '15']
+    }
+  }
+}
 
 test.serial.cb('healthcheck', function (t) {
   const url = '/health'
@@ -64,59 +64,42 @@ test.serial.cb('Get A Target Successfully', (t) => {
 })
 
 test.serial.cb('Create A Target Successfully', (t) => {
-  const req = servertest(server(), '/api/targets', {
-    method: 'POST',
-    body: {
-      url: 'http://google.com',
-      value: '0.50',
-      maxAcceptsPerDay: '10',
-      accept: {
-        geoState: {
-          $in: ['ca', 'ph']
-        },
-        hour: {
-          $in: ['13', '14', '15']
-        }
-      }
-    }
+  const req = servertest(server(), '/api/targets', { method: 'POST' }, (err, res) => {
+    t.falsy(err, 'no error')
+    t.deepEqual(res.body, 'Create Target Success!', 'Data is Equal')
+    t.end()
   })
 
-  req.on('end', (err, data) => {
-    t.isError(err, 'no error')
-    t.deepEqual(data, 'Create Target Success', 'Data is Equal')
-  })
-  t.end()
+  req.write(JSON.stringify(requestData))
+  req.end()
 })
 
 test.serial.cb('Update A Target Successfully', (t) => {
-  const req = servertest(server(), '/api/target/1', {
-    method: 'POST',
-    body: {
-      url: 'http://www.google.com'
-    }
+  const req = servertest(server(), '/api/target/1', { method: 'POST' }, (err, res) => {
+    t.falsy(err, 'no error')
+    t.end()
+    t.deepEqual(res.body, 'Target Update Success', 'Data is Equal')
   })
 
-  req.on('end', (err, data) => {
-    t.isError(err, 'no error')
-    t.deepEqual(data, 'Target Update Success', 'Data is Equal')
-  })
-  t.end()
+  req.write(JSON.stringify({
+    url: 'http://www.google.com'
+  }))
+
+  req.end()
 })
 
 test.serial.cb('Request to Server Expected Accepted', (t) => {
-  const req = servertest(server(), '/api/target/1', {
-    encoding: 'json',
-    method: 'POST',
-    body: {
-      geoState: 'ca',
-      publisher: 'abc',
-      timestamp: '2018-07-19T23:28:59.513Z'
-    }
+  const req = servertest(server(), '/api/target/1', { encoding: 'json', method: 'POST' }, (err, res) => {
+    t.falsy(err, 'no error')
+    t.end()
+    t.deepEqual(res.body, { decision: 'accepted' }, 'Data is Equal')
   })
 
-  req.on('end', (err, data) => {
-    t.isError(err, 'no error')
-    t.deepEqual(data, { decision: 'accepted' }, 'Data is Equal')
-  })
-  t.end()
+  req.write(JSON.stringify({
+    geoState: 'ca',
+    publisher: 'abc',
+    timestamp: '2018-07-19T23:28:59.513Z'
+  }))
+
+  req.end()
 })
