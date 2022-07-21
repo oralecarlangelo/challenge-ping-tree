@@ -2,7 +2,6 @@ process.env.NODE_ENV = 'test'
 
 var test = require('ava')
 var servertest = require('servertest')
-
 var server = require('../lib/server')
 
 const STORED_DATA = [{
@@ -55,7 +54,7 @@ test.serial.cb('Get All Targets Successfully', (t) => {
 })
 
 test.serial.cb('Get A Target Successfully', (t) => {
-  servertest(server(), '/api/target/1', { encoding: 'json' }, (err, res, req) => {
+  servertest(server(), '/api/target/1', { encoding: 'json' }, (err, res) => {
     t.falsy(err, 'no err')
     t.deepEqual(res.body, STORED_DATA[0], 'Data is Complete')
     t.is(res.statusCode, 200, 'correct statusCode')
@@ -66,7 +65,7 @@ test.serial.cb('Get A Target Successfully', (t) => {
 test.serial.cb('Create A Target Successfully', (t) => {
   const req = servertest(server(), '/api/targets', { method: 'POST' }, (err, res) => {
     t.falsy(err, 'no error')
-    t.deepEqual(res.body, 'Create Target Success!', 'Data is Equal')
+    t.is(res.body.toString(), 'Create Target Success!', 'Data is Equal')
     t.end()
   })
 
@@ -77,8 +76,8 @@ test.serial.cb('Create A Target Successfully', (t) => {
 test.serial.cb('Update A Target Successfully', (t) => {
   const req = servertest(server(), '/api/target/1', { method: 'POST' }, (err, res) => {
     t.falsy(err, 'no error')
+    t.deepEqual(res.body.toString(), 'Target Update Success', 'Data is Equal')
     t.end()
-    t.deepEqual(res.body, 'Target Update Success', 'Data is Equal')
   })
 
   req.write(JSON.stringify({
@@ -89,10 +88,10 @@ test.serial.cb('Update A Target Successfully', (t) => {
 })
 
 test.serial.cb('Request to Server Expected Accepted', (t) => {
-  const req = servertest(server(), '/api/target/1', { encoding: 'json', method: 'POST' }, (err, res) => {
+  const req = servertest(server(), '/route', { method: 'POST' }, (err, res) => {
     t.falsy(err, 'no error')
+    t.deepEqual(JSON.parse(res.body.toString()), { decision: 'accepted' }, 'Data is Equal')
     t.end()
-    t.deepEqual(res.body, { decision: 'accepted' }, 'Data is Equal')
   })
 
   req.write(JSON.stringify({
