@@ -2,7 +2,6 @@ process.env.NODE_ENV = 'test'
 
 var test = require('ava')
 var servertest = require('servertest')
-
 var server = require('../lib/server')
 
 const STORED_DATA = [{
@@ -45,7 +44,7 @@ const userRequestData = {
 }
 
 test.serial.cb('healthcheck', function (t) {
-  var url = '/health'
+  const url = '/health'
   servertest(server(), url, { encoding: 'json' }, function (err, res) {
     t.falsy(err, 'no error')
 
